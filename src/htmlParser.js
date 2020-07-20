@@ -47,6 +47,17 @@ var htmlParser = (function() {
     }
     return els;
   };
+
+  util.parseDataAttr = function(str) {
+    var json = null;
+    try {
+      var cleanStr = str.replace(/&quot;/gi,'"');
+      json = JSON.parse(cleanStr);
+    } catch (err) {
+      json = '';
+    }
+    return json;
+  }
   
   util.splitAttrs = function(str) {
     var obj={}, token;
@@ -56,7 +67,15 @@ var htmlParser = (function() {
       while ( (token=splitAttrsTokenizer.exec(str)) ) {
         if (token[1].indexOf('data-') !== -1) {
           // obj[token[1]] = token[3];
-          obj[token[1].replace(/-/gi, '')] = JSON.parse(token[3].replace(/&quot;/gi,'"'));
+          var dataSetName = token[1]
+            .replace(/^data-/g, '')
+            .split('-')
+            .map(function (namePart, i) {
+              return i !== 0 ? namePart.charAt(0).toUpperCase() + namePart.slice(1) : namePart;
+            })
+            .join('');
+          if (!obj['dataset']) obj['dataset'] = {};
+          obj['dataset'][dataSetName] = util.parseDataAttr(token[3]);
         } else {
           obj[token[1]] = token[3];
         }

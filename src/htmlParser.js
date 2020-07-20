@@ -54,7 +54,12 @@ var htmlParser = (function() {
       splitAttrsTokenizer.lastIndex = 0;
       str = ' '+(str || '')+' ';
       while ( (token=splitAttrsTokenizer.exec(str)) ) {
-        obj[token[1]] = token[3];
+        if (token[1].indexOf('data-') !== -1) {
+          // obj[token[1]] = token[3];
+          obj[token[1].replace(/-/gi, '')] = JSON.parse(token[3].replace(/&quot;/gi,'"'));
+        } else {
+          obj[token[1]] = token[3];
+        }
       }
     }
     return obj;
